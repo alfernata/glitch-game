@@ -1,10 +1,12 @@
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
+import java.awt.event.*;
 import java.sql.Time;
 import java.util.Random;
 import java.util.ArrayList;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+
 
 
 
@@ -53,10 +55,13 @@ class GameWindow{
 
 }
 
+
+
+
 class GamePanel extends JPanel{
 
     // размер игрока
-    private static final int CELL_SIZE = 85;
+    private static final int CELL_SIZE = 45;
     private static final int APPLE_SIZE = 30;
 
     // скорость движения в пикселях за один кадр
@@ -71,7 +76,12 @@ class GamePanel extends JPanel{
     // координаты яблока
     private Point apple;
 
-    private String direction = "RIGHT";
+    // положение курсора игрока
+    private Point cursor = new Point();
+
+    private static final int SEGMENT_DISTANCE = 55;
+
+//    private String direction = "RIGHT";
 
     // создаем объект класса Enemy, задаем в параметрах координаты x и y
     // 500      - время реакции в миллисекундах
@@ -90,34 +100,53 @@ class GamePanel extends JPanel{
         setFocusable(true);
 
         // метод, в котором мы создаем объект KeyAdapter и сразу же говорим, что хотим изменит его методы
-        addKeyListener(new KeyAdapter(){
+//        addKeyListener(new KeyAdapter(){
+//
+//            // переопредялем методы анонимного класса KeyAdapter
+//            @Override
+//            public void keyPressed(KeyEvent e){
+//
+//                // У объекта KeyEvent спросить код клавиши
+//                switch (e.getKeyCode()){
+//
+//                    case KeyEvent.VK_UP:
+//                        direction = "UP";
+//                        break;
+//
+//                    case KeyEvent.VK_DOWN:
+//                        direction = "DOWN";
+//                        break;
+//
+//                    case KeyEvent.VK_LEFT:
+//                        direction = "LEFT";
+//                        break;
+//
+//                    case KeyEvent.VK_RIGHT:
+//                        direction = "RIGHT";
+//                        break;
+//
+//                }
+//            }
+//        });
 
-            // переопредялем методы анонимного класса KeyAdapter
+
+
+        //управление курсором
+
+        addMouseMotionListener(new MouseMotionAdapter() {
+
             @Override
-            public void keyPressed(KeyEvent e){
-
-                // У объекта KeyEvent спросить код клавиши
-                switch (e.getKeyCode()){
-
-                    case KeyEvent.VK_UP:
-                        direction = "UP";
-                        break;
-
-                    case KeyEvent.VK_DOWN:
-                        direction = "DOWN";
-                        break;
-
-                    case KeyEvent.VK_LEFT:
-                        direction = "LEFT";
-                        break;
-
-                    case KeyEvent.VK_RIGHT:
-                        direction = "RIGHT";
-                        break;
-
-                }
+            public void mouseMoved(MouseEvent e){
+                cursor.setLocation(e.getPoint());
             }
+
+            @Override
+            public void mouseDragged(MouseEvent e){
+                cursor.setLocation(e.getPoint());
+            }
+
         });
+
 
 
         snake.add(new Point(300, 300));
@@ -150,13 +179,53 @@ class GamePanel extends JPanel{
 
 
     public void startGame(){
+
         createApple();
+        cursor.setLocation(snake.get(0));
+
     }
 
 
     private void moveSnake(){
 
-        for (int i = snake.size() - 1; i > 0; i--){
+
+        Point head = snake.get(0);
+
+        double dx = cursor.x - head.x;
+        double dy = cursor.y - head.y;
+
+        double distance = Math.sqrt(dx * dx + dy * dy);
+
+        if (distance > SPEED){
+
+            head.x += (int)(dx / distance * SPEED);
+            head.y += (int)(dy / distance * SPEED);
+
+        }
+
+        for (int i = 1; i < snake.size(); i++){
+
+
+            Point previous = snake.get(i - 1);
+            Point current = snake.get(i);
+
+            dx = previous.x - current.x;
+            dy = previous.y - current.y;
+
+            distance = Math.sqrt(dx * dx + dy * dy);
+
+            if (distance > SEGMENT_DISTANCE){
+
+                current.x += (int) (dx / distance * (distance - SEGMENT_DISTANCE));
+                current.y += (int) (dy / distance * (distance - SEGMENT_DISTANCE));
+
+            }
+
+        }
+
+
+
+    /**    for (int i = snake.size() - 1; i > 0; i--){
 
             Point previous = snake.get(i - 1);
 
@@ -190,7 +259,7 @@ class GamePanel extends JPanel{
             case "RIGHT":
                 head.x += SPEED;
                 break;
-        }
+        } **/
 
     }
 
