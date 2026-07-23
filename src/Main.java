@@ -1,13 +1,8 @@
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.sql.Time;
 import java.util.Random;
 import java.util.ArrayList;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
-
-
 
 
 class GameWindow{
@@ -55,7 +50,22 @@ class GameWindow{
 
 }
 
+class Segment{
 
+    double x;
+    double y;
+
+    Segment (double x, double y){
+        this.x = x;
+        this.y = y;
+    }
+
+    Segment (Segment other){
+        this.x = other.x;
+        this.y = other.y;
+    }
+
+}
 
 
 class GamePanel extends JPanel{
@@ -68,7 +78,7 @@ class GamePanel extends JPanel{
     private static final int SPEED = 7;
 
     //?
-    private ArrayList<Point> snake = new ArrayList<>();
+    private ArrayList<Segment> snake = new ArrayList<>();
 
     // приватный рандомный рандом
     private Random random = new Random();
@@ -79,7 +89,17 @@ class GamePanel extends JPanel{
     // положение курсора игрока
     private Point cursor = new Point();
 
+    private double directionX = 1;
+    private double directionY = 0;
+
+    private static final double TURN_SPEED = 0.18;
+
+    private double angle = 0;
+    private static final double MAX_TURN_SPEED = 0.08;
+
     private static final int SEGMENT_DISTANCE = 55;
+
+
 
 //    private String direction = "RIGHT";
 
@@ -149,9 +169,9 @@ class GamePanel extends JPanel{
 
 
 
-        snake.add(new Point(300, 300));
-        snake.add(new Point(240, 300));
-        snake.add(new Point(180, 300));
+        snake.add(new Segment(300, 300));
+        snake.add(new Segment(240, 300));
+        snake.add(new Segment(180, 300));
 
 
         // -> это лямбда-выражение, сокращенная запись метода  @Override
@@ -165,7 +185,10 @@ class GamePanel extends JPanel{
             // раз в задержку таймера (16) передаем в метод updateTarget Point координаты змейки (v1)
             // Теперь  метод updateTarget сам решает, когда обновлять информацию.
             // Например: reactionTime = 500 значит:  мышь получает координаты только раз в полсекунды.
-            mouse.updateTarget(snake.get(0));
+            mouse.updateTarget(new Point(
+                    (int) snake.get(0).x,
+                    (int) snake.get(0).y
+            ));
             // затем вызываем метод move
             mouse.move();
 
@@ -181,43 +204,116 @@ class GamePanel extends JPanel{
     public void startGame(){
 
         createApple();
-        cursor.setLocation(snake.get(0));
+        cursor.setLocation(
+                snake.get(0).x,
+                snake.get(0).y);
 
     }
 
 
     private void moveSnake(){
 
+        // получаем голову змейки
+        Segment head = snake.get(0);
 
-        Point head = snake.get(0);
+        // находим координаты центра головы
+        double centerX = head.x + CELL_SIZE / 2.0;
+        double centerY = head.y + CELL_SIZE / 2.0;
 
-        double dx = cursor.x - head.x;
-        double dy = cursor.y - head.y;
 
-        double distance = Math.sqrt(dx * dx + dy * dy);
+        // считаем вектор - от курсора до головы, затем через atan2 считаем угол
+        double targetAngle = Math.atan2(
+                cursor.y - centerY,
+                cursor.x - centerX
+        );
 
-        if (distance > SPEED){
 
-            head.x += (int)(dx / distance * SPEED);
-            head.y += (int)(dy / distance * SPEED);
+        // рассчитываем необходимый поворот головы змейки до курсора
+        double difference = targetAngle - angle;
+
+
+
+        // нормализуем через число Пи. например: сейчас 350, нужно 10.
+        // мы говорим считать НЕ 10 - 350, а от 350 до 10 (351, 352...360, 0, 1 ... 10)
+
+        while (difference > Math.PI){
+            difference -= Math.PI * 2;
+        }
+
+        while (difference < -Math.PI){
+            difference += Math.PI * 2;
+        }
+
+        // проверяем расстояние до курсора через теорему пифагора
+
+        double distanceToCursor =
+                Math.sqrt(
+                        Math.pow (cursor.x-centerX,2) +
+                                Math.pow (cursor.y-centerY,2)
+                );
+
+
+        // поворачиваемся только если курсор дальше, чем клетка от центра головы
+        if (distanceToCursor > CELL_SIZE){
+
+            // если разница в крусоре и угле змейки небольшая (считаем разницу в модуле и сравниваем с радианой)
+            // то приравниваем угол змейки к углу курсора
+            if (Math.abs(difference) < MAX_TURN_SPEED){
+
+                angle = targetAngle;
+
+            }
+
+            // иначе разворачиваем, задавая скорость
+            else {
+
+                angle += Math.signum(difference)
+                        * MAX_TURN_SPEED;
+
+            }
 
         }
 
+
+
+        // перевод угла обратно в вектор
+        double directionX = Math.cos(angle);
+        double directionY = Math.sin(angle);
+
+        // двигаем голову
+        head.x += directionX * SPEED;
+        head.y += directionY * SPEED;
+
+
+        // подтягиваем хвост за предыдущим сегментом через теорему пифагора
         for (int i = 1; i < snake.size(); i++){
 
 
-            Point previous = snake.get(i - 1);
-            Point current = snake.get(i);
+            Segment previous = snake.get(i-1);
+            Segment current = snake.get(i);
 
-            dx = previous.x - current.x;
-            dy = previous.y - current.y;
 
-            distance = Math.sqrt(dx * dx + dy * dy);
+
+            double dx = previous.x - current.x;
+            double dy = previous.y - current.y;
+
+
+            double distance =
+                    Math.sqrt(dx*dx + dy*dy);
+
+
 
             if (distance > SEGMENT_DISTANCE){
 
-                current.x += (int) (dx / distance * (distance - SEGMENT_DISTANCE));
-                current.y += (int) (dy / distance * (distance - SEGMENT_DISTANCE));
+
+                current.x +=
+                        dx / distance *
+                                (distance - SEGMENT_DISTANCE);
+
+
+                current.y +=
+                        dy / distance *
+                                (distance - SEGMENT_DISTANCE);
 
             }
 
@@ -265,7 +361,7 @@ class GamePanel extends JPanel{
 
     private void checkBorders(){
 
-        Point head = snake.get(0);
+        Segment head = snake.get(0);
 
         if (head.x < 0){
             head.x = getWidth() - CELL_SIZE;
@@ -320,8 +416,8 @@ class GamePanel extends JPanel{
 
         // создаем область головы змейки
         Rectangle snakeArea = new Rectangle(
-                snake.get(0).x,
-                snake.get(0).y,
+                (int) snake.get(0).x,
+                (int) snake.get(0).y,
                 CELL_SIZE,
                 CELL_SIZE
         );
@@ -344,7 +440,7 @@ class GamePanel extends JPanel{
 
 
             // создаем новый сегмент
-            snake.add(new Point(
+            snake.add(new Segment(
                     snake.get(snake.size() - 1)
             ));
 
@@ -373,10 +469,10 @@ class GamePanel extends JPanel{
 
         // змейка
 
-        for (Point segment : snake){
+        for (Segment segment : snake){
             g.fillRect(
-                    segment.x,
-                    segment.y,
+                    (int) segment.x,
+                    (int) segment.y,
                     CELL_SIZE,
                     CELL_SIZE
             );
@@ -476,7 +572,7 @@ class Enemy {
     private Point target;
 
     // Движение
-    private int speed = 3;
+    private int speed = 2;
     private static final int SIZE = 50;
 
     // Как часто мышь получает новую информацию
