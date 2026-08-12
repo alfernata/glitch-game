@@ -1,8 +1,8 @@
 import javax.swing.*;
+import javax.swing.Timer;
 import java.awt.*;
 import java.awt.event.*;
-import java.util.Random;
-import java.util.ArrayList;
+import java.util.*;
 
 
 class GameWindow{
@@ -17,7 +17,7 @@ class GameWindow{
         GameWindow game = new GameWindow();
 
         game.createWindow();
-        game.createPanel();
+//        game.createPanel();
         game.initializeGame();
 
     }
@@ -42,10 +42,308 @@ class GameWindow{
 
     private void initializeGame(){
         frame.setVisible(true);
-        SwingUtilities.invokeLater(() -> {
-            panel.startGame();
-        });
+
+        CharacterSelectPanel selectPanel = new CharacterSelectPanel(frame);
+        frame.add(selectPanel);
+
+//        SwingUtilities.invokeLater(() -> {
+//            panel.startGame();
+//        });
     }
+
+
+class CharacterSelectPanel extends JPanel{
+
+        private JFrame frame;
+
+        private CatInfo selectedCat;
+
+
+        public CharacterSelectPanel (JFrame frame){
+
+            this.frame = frame;
+
+            setBackground(Color.BLACK);
+
+            setLayout(new GridLayout(1, 4, 20, 20));
+
+            createCards();
+        }
+
+        private void createCards(){
+
+            for (String name : CatDatabase.cats.keySet()){
+
+                CatInfo cat = CatDatabase.cats.get(name);
+                JPanel card = createCard(cat);
+
+                add(card);
+
+            }
+
+        }
+
+        private JPanel createCard(CatInfo cat){
+
+            JPanel card = new JPanel(){
+
+                @Override
+                protected void paintComponent(Graphics g){
+
+                    super.paintComponent(g);
+
+
+                    Graphics2D g2 =
+                            (Graphics2D)g;
+
+
+                    g2.setColor(
+                            new Color(45,45,45)
+                    );
+
+
+                    g2.fillRoundRect(
+                            10,
+                            50,
+                            getWidth() - 40,
+                            getHeight() - 200,
+                            30,
+                            30
+                    );
+
+
+                }
+
+            };
+
+
+            card.setLayout(null);
+
+
+            card.setOpaque(false);
+
+            card.setPreferredSize(
+                    new Dimension(
+                            240,
+                            650
+                    )
+            );
+
+
+
+            // белый прямоугольник
+
+            JPanel image =
+                    new JPanel();
+
+
+            image.setBackground(
+                    Color.WHITE
+            );
+
+
+            image.setBounds(
+                    50,
+                    100,
+                    500,
+                    700
+            );
+
+
+            card.add(image);
+
+
+
+            // текст
+
+            JLabel info =
+                    new JLabel(
+                            "<html>" +
+
+                                    "NAME:<br>" +
+                                    cat.name +
+                                    "<br><br>" +
+
+                                    "TYPE:<br>" +
+                                    cat.type +
+                                    "<br><br>" +
+
+                                    "THREAT:<br>" +
+                                    cat.threatLevel +
+                                    "<br><br>" +
+
+                                    "FUNCTION:<br>" +
+                                    cat.primaryFunction +
+                                    "<br><br>" +
+
+                                    "STATUS:<br>" +
+                                    cat.status +
+
+                                    "</html>"
+                    );
+
+
+
+            info.setForeground(
+                    Color.WHITE
+            );
+
+
+            info.setFont(
+                    new Font(
+                            "Monospaced",
+                            Font.PLAIN,
+                            18
+                    )
+            );
+
+
+            info.setBounds(
+                    100,
+                    800,
+                    200,
+                    400
+            );
+
+
+            card.add(info);
+
+
+
+            card.addMouseListener(
+                    new MouseAdapter(){
+
+
+                        @Override
+                        public void mouseClicked(MouseEvent e){
+
+
+                            selectedCat = cat;
+
+
+                            System.out.println(
+                                    "SELECTED ENTITY:"
+                            );
+
+
+                            System.out.println(
+                                    cat.getDescription()
+                            );
+
+
+                            startGame();
+
+
+                        }
+
+                    }
+            );
+
+
+
+            return card;
+
+        }
+
+
+        private void startGame(){
+
+            frame.getContentPane().removeAll();
+
+            GamePanel panel = new GamePanel();
+
+            frame.add(panel);
+            frame.revalidate();
+            frame.repaint();
+
+            panel.startGame();
+
+        }
+
+
+}
+
+
+}
+
+class CatInfo{
+
+    String name;
+    String type;
+    String threatLevel;
+    String primaryFunction;
+    String status;
+
+    public CatInfo(
+            String name,
+            String type,
+            String threatLevel,
+            String primaryFunction,
+            String status
+    ){
+
+        this.name = name;
+        this.type = type;
+        this.threatLevel = threatLevel;
+        this.primaryFunction = primaryFunction;
+        this.status = status;
+
+    }
+
+    public String getDescription(){
+        return
+                "TYPE: " + type + "\n" +
+                "THREAT LEVEL: " + threatLevel + "\n" +
+                "PRIMARY FUNCTION: " + primaryFunction + "\n" +
+                "STATUS: " + status;
+    }
+
+
+}
+
+class CatDatabase{
+    static Map<String, CatInfo> cats = new HashMap<>();
+
+    static {
+
+        cats.put("NIGEL",
+                new CatInfo(
+                        "NIGEL",
+                        "MECHANICAL ENTITY",
+                        "UNKNOWN",
+                        "TARGET INTERCEPTION",
+                        "ACTIVE"
+                ));
+
+        cats.put("WILLY",
+                new CatInfo(
+                        "WILLY",
+                        "VOID ENTITY",
+                        "UNKNOWN",
+                        "REALITY DISTORTION",
+                        "ACTIVE"
+                ));
+
+        cats.put("ARISTOTLE",
+                new CatInfo(
+                        "ARISTOTLE",
+                        "PSIONIC ENTITY",
+                        "UNKNOWN",
+                        "MIND CONTROL",
+                        "ACTIVE"
+                ));
+
+        cats.put("VICTOR",
+                new CatInfo(
+                        "VICTOR",
+                        "CHAOS ENTITY",
+                        "CRITICAL",
+                        "RULE CORRUPTION",
+                        "UNSTABLE"
+                ));
+
+    }
+
 
 
 }
@@ -98,6 +396,12 @@ class GamePanel extends JPanel{
     private static final double MAX_TURN_SPEED = 0.08;
 
     private static final int SEGMENT_DISTANCE = 55;
+
+    private static final int MAX_SNAKE_SIZE = 15;
+
+    private Timer timer;
+
+    private boolean gameOver = false;
 
 
 
@@ -177,7 +481,7 @@ class GamePanel extends JPanel{
         // -> это лямбда-выражение, сокращенная запись метода  @Override
         //    public void actionPerformed(ActionEvent e
 
-        Timer timer = new Timer(16, e -> {
+        timer = new Timer(16, e -> {
             moveSnake();
             checkBorders();
             checkApple();
@@ -191,6 +495,8 @@ class GamePanel extends JPanel{
             ));
             // затем вызываем метод move
             mouse.move();
+
+            checkEnemyCollision();
 
 
             // метод класса JPanel, JAVA понимает ЭТО так this.repaint();
@@ -440,9 +746,17 @@ class GamePanel extends JPanel{
 
 
             // создаем новый сегмент
-            snake.add(new Segment(
-                    snake.get(snake.size() - 1)
-            ));
+            if (snake.size() < MAX_SNAKE_SIZE){
+                snake.add(new Segment(
+                        snake.get(snake.size() - 1)
+                ));
+
+            }
+            if (snake.size() == MAX_SNAKE_SIZE){
+                System.out.println("WIN");
+                System.exit(0);
+            }
+
 
 
 
@@ -451,6 +765,67 @@ class GamePanel extends JPanel{
             createApple();
 
         }
+
+    }
+
+
+    private void checkEnemyCollision(){
+
+        Rectangle mouseArea = new Rectangle(
+                mouse.getX(),
+                mouse.getY(),
+                mouse.getSize(),
+                mouse.getSize()
+        );
+
+        for (int i = 0; i < snake.size(); i++){
+
+            Segment segment = snake.get(i);
+
+            Rectangle segmentArea = new Rectangle(
+                    (int) segment.x,
+                    (int) segment.y,
+                    CELL_SIZE,
+                    CELL_SIZE
+            );
+
+            if (mouseArea.intersects(segmentArea)){
+
+                if (i == 0){
+//                    System.out.println("GAME OVER");
+                    endGame();
+                    return;
+                }
+
+                else {
+                    if (i <= 2){
+//                        System.out.println("GAME OVER");
+                        endGame();
+                    }
+
+                    while (snake.size() > i){
+                        snake.remove(i);
+                    }
+                    return;
+                }
+            }
+        }
+
+    }
+
+    private void endGame(){
+
+        if (gameOver){
+            return;
+        }
+
+        gameOver = true;
+
+        System.out.println("GAME OVER");
+
+        System.exit(0);
+
+//        timer.stop();
 
     }
 
