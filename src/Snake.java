@@ -1,0 +1,106 @@
+import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
+
+class Snake {
+
+    // поля — то, что раньше было в GamePanel
+    //?
+    private ArrayList<Segment> segments;
+
+    private double speed;
+    private double angle = 0;
+
+    private static final int CELL_SIZE = 45;
+    private static final double MAX_TURN_SPEED = 0.08;
+    private static final int SEGMENT_DISTANCE = 55;
+
+    // временный конструктор — полноценно займёмся конструкторами на Дне 2
+    public Snake(List<Segment> initialSegments, double speed) {
+        this.segments = new ArrayList<>(initialSegments);
+        this.speed = speed;
+    }
+
+    // геттер — временно даёт GamePanel доступ к списку сегментов
+    // (полную инкапсуляцию сделаем на Дне 3)
+    public List<Segment> getSegments() {
+        return segments;
+    }
+
+    // тело метода — 1 в 1 из GamePanel.moveSnake(),
+    // "cursor" стал параметром, потому что курсор — это данные UI, а не змейки
+    public void move(Point cursorTarget) {
+
+        Segment head = segments.get(0);
+
+        double centerX = head.x + CELL_SIZE / 2.0;
+        double centerY = head.y + CELL_SIZE / 2.0;
+
+        double targetAngle = Math.atan2(
+                cursorTarget.y - centerY,
+                cursorTarget.x - centerX
+        );
+
+        double difference = targetAngle - angle;
+
+        while (difference > Math.PI) {
+            difference -= Math.PI * 2;
+        }
+        while (difference < -Math.PI) {
+            difference += Math.PI * 2;
+        }
+
+        double distanceToCursor = Math.sqrt(
+                Math.pow(cursorTarget.x - centerX, 2) +
+                        Math.pow(cursorTarget.y - centerY, 2)
+        );
+
+        if (distanceToCursor > CELL_SIZE) {
+            if (Math.abs(difference) < MAX_TURN_SPEED) {
+                angle = targetAngle;
+            } else {
+                angle += Math.signum(difference) * MAX_TURN_SPEED;
+            }
+        }
+
+        double directionX = Math.cos(angle);
+        double directionY = Math.sin(angle);
+
+        head.x += directionX * speed;
+        head.y += directionY * speed;
+
+        for (int i = 1; i < segments.size(); i++) {
+            Segment previous = segments.get(i - 1);
+            Segment current = segments.get(i);
+
+            double dx = previous.x - current.x;
+            double dy = previous.y - current.y;
+            double distance = Math.sqrt(dx * dx + dy * dy);
+
+            if (distance > SEGMENT_DISTANCE) {
+                current.x += dx / distance * (distance - SEGMENT_DISTANCE);
+                current.y += dy / distance * (distance - SEGMENT_DISTANCE);
+            }
+        }
+    }
+
+    // тело метода — 1 в 1 из GamePanel.checkBorders(),
+    // width/height теперь параметры, а не getWidth()/getHeight() из JPanel
+    public void checkBorders(int width, int height) {
+
+        Segment head = segments.get(0);
+
+        if (head.x < 0) {
+            head.x = width - CELL_SIZE;
+        }
+        if (head.x > width - CELL_SIZE) {
+            head.x = 0;
+        }
+        if (head.y < 0) {
+            head.y = height - CELL_SIZE;
+        }
+        if (head.y > height - CELL_SIZE) {
+            head.y = 0;
+        }
+    }
+}
