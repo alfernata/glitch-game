@@ -77,8 +77,8 @@ class GamePanel extends JPanel {
             // раз в задержку таймера (16) передаем в метод updateTarget Point координаты змейки (v1)
             // reactionTime = 500 значит: мышь получает координаты только раз в полсекунды
             mouse.updateTarget(new Point(
-                    (int) snake.getSegments().get(0).x,
-                    (int) snake.getSegments().get(0).y
+                    (int) snake.getHead().x,
+                    (int) snake.getHead().y
             ));
 
             // затем вызываем метод move
@@ -98,8 +98,8 @@ class GamePanel extends JPanel {
 
         createApple();
         cursor.setLocation(
-                snake.getSegments().get(0).x,
-                snake.getSegments().get(0).y);
+                snake.getHead().x,
+                snake.getHead().y);
 
     }
 
@@ -131,8 +131,8 @@ class GamePanel extends JPanel {
 
         // создаем область головы змейки
         Rectangle snakeArea = new Rectangle(
-                (int) snake.getSegments().get(0).x,
-                (int) snake.getSegments().get(0).y,
+                (int) snake.getHead().x,
+                (int) snake.getHead().y,
                 CELL_SIZE,
                 CELL_SIZE
         );
@@ -149,12 +149,18 @@ class GamePanel extends JPanel {
         if (snakeArea.intersects(appleArea)) {
 
             // создаем новый сегмент
-            if (snake.getSegments().size() < MAX_SNAKE_SIZE) {
-                snake.getSegments().add(new Segment(
-                        snake.getSegments().get(snake.getSegments().size() - 1)
-                ));
+
+            if (snake.size() < MAX_SNAKE_SIZE){
+                snake.grow();
             }
-            if (snake.getSegments().size() == MAX_SNAKE_SIZE) {
+
+
+//            if (snake.getSegments().size() < MAX_SNAKE_SIZE) {
+//                snake.getSegments().add(new Segment(
+//                        snake.getSegments().get(snake.getSegments().size() - 1)
+//                ));
+//            }
+            if (snake.size() == MAX_SNAKE_SIZE) {
                 System.out.println("WIN");
                 System.exit(0);
             }
@@ -174,7 +180,10 @@ class GamePanel extends JPanel {
                 mouse.getSize()
         );
 
-        List<Segment> segments = snake.getSegments();
+//        List<Segment> segments = snake.getSegments();
+
+        // getSegments() теперь read-only — используем только для чтения
+        var segments = snake.getSegments();
 
         for (int i = 0; i < segments.size(); i++) {
 
@@ -197,9 +206,10 @@ class GamePanel extends JPanel {
                         endGame();
                     }
 
-                    while (segments.size() > i) {
-                        segments.remove(i);
-                    }
+//                    while (segments.size() > i) {
+//                        segments.remove(i);
+//                    }
+                    snake.cutTailFrom(i);
                     return;
                 }
             }

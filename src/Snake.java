@@ -1,11 +1,11 @@
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 class Snake {
 
     // поля — то, что раньше было в GamePanel
-    //?
     private ArrayList<Segment> segments;
 
     private double speed;
@@ -24,8 +24,45 @@ class Snake {
     // геттер — временно даёт GamePanel доступ к списку сегментов
     // (полную инкапсуляцию сделаем на Дне 3)
     public List<Segment> getSegments() {
-        return segments;
+
+        // обёртка "только для чтения"
+        return Collections.unmodifiableList(segments);
+
     }
+
+    // овый метод — замена прямого snake.getSegments().get(0) по всему GamePanel
+    public Segment getHead(){
+        return segments.get(0);
+    }
+
+    // тело логики, которая раньше была прямо в GamePanel.checkApple()
+    public void grow(){
+        Segment last = segments.get(segments.size() - 1);
+        segments.add(new Segment(last));
+    }
+
+    public void cutTailFrom (int index){
+
+
+        // защита инварианта: нельзя обрезать голову (index 0) этим методом —
+        // за смерть змейки целиком отвечает другая логика (endGame в GamePanel),
+        // а не "обрезание хвоста"
+
+        if (index <= 0){
+            return;
+        }
+
+        while (segments.size() > index){
+            segments.remove(segments.size() - 1);
+        }
+
+    }
+
+    public int size(){
+        return segments.size();
+    }
+
+
 
     // тело метода — 1 в 1 из GamePanel.moveSnake(),
     // "cursor" стал параметром, потому что курсор — это данные UI, а не змейки
