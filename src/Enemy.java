@@ -12,8 +12,8 @@ class Enemy {
     private Point target;
 
     // Движение
-    private int speed = 2;
-    private static final int SIZE = 50;
+    private int speed = GameConfig.ENEMY_DEFAULT_SPEED;
+    private static final int SIZE = GameConfig.ENEMY_SIZE;
 
     // Как часто мышь получает новую информацию
     private int reactionTime;
@@ -41,7 +41,7 @@ class Enemy {
     private long mistakeEndTime;
 
     // Сколько длится ошибка
-    private int mistakeDuration = 800;
+    private int mistakeDuration = GameConfig.ENEMY_MISTAKE_DURATION;
 
     private Random random = new Random();
 
@@ -139,7 +139,7 @@ class Enemy {
         // запрещаем принимать решение
         // слишком часто
 
-        nextDecisionTime = currentTime + 500;
+        nextDecisionTime = currentTime + GameConfig.ENEMY_DECISION_INTERVAL;
 
         int chance = random.nextInt(100);
 

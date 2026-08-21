@@ -11,9 +11,9 @@ class Snake {
     private double speed;
     private double angle = 0;
 
-    private static final int CELL_SIZE = 45;
-    private static final double MAX_TURN_SPEED = 0.08;
-    private static final int SEGMENT_DISTANCE = 55;
+//    private static final int CELL_SIZE = 45;
+//    private static final double MAX_TURN_SPEED = 0.08;
+//    private static final int SEGMENT_DISTANCE = 55;
 
     // временный конструктор — полноценно займёмся конструкторами на Дне 2
     public Snake(List<Segment> initialSegments, double speed) {
@@ -70,8 +70,8 @@ class Snake {
 
         Segment head = segments.get(0);
 
-        double centerX = head.x + CELL_SIZE / 2.0;
-        double centerY = head.y + CELL_SIZE / 2.0;
+        double centerX = head.x + GameConfig.CELL_SIZE / 2.0;
+        double centerY = head.y + GameConfig.CELL_SIZE / 2.0;
 
         double targetAngle = Math.atan2(
                 cursorTarget.y - centerY,
@@ -92,11 +92,11 @@ class Snake {
                         Math.pow(cursorTarget.y - centerY, 2)
         );
 
-        if (distanceToCursor > CELL_SIZE) {
-            if (Math.abs(difference) < MAX_TURN_SPEED) {
+        if (distanceToCursor > GameConfig.CELL_SIZE) {
+            if (Math.abs(difference) < GameConfig.MAX_TURN_SPEED) {
                 angle = targetAngle;
             } else {
-                angle += Math.signum(difference) * MAX_TURN_SPEED;
+                angle += Math.signum(difference) * GameConfig.MAX_TURN_SPEED;
             }
         }
 
@@ -114,9 +114,9 @@ class Snake {
             double dy = previous.y - current.y;
             double distance = Math.sqrt(dx * dx + dy * dy);
 
-            if (distance > SEGMENT_DISTANCE) {
-                current.x += dx / distance * (distance - SEGMENT_DISTANCE);
-                current.y += dy / distance * (distance - SEGMENT_DISTANCE);
+            if (distance > GameConfig.SEGMENT_DISTANCE) {
+                current.x += dx / distance * (distance - GameConfig.SEGMENT_DISTANCE);
+                current.y += dy / distance * (distance - GameConfig.SEGMENT_DISTANCE);
             }
         }
     }
@@ -128,15 +128,15 @@ class Snake {
         Segment head = segments.get(0);
 
         if (head.x < 0) {
-            head.x = width - CELL_SIZE;
+            head.x = width - GameConfig.CELL_SIZE;
         }
-        if (head.x > width - CELL_SIZE) {
+        if (head.x > width - GameConfig.CELL_SIZE) {
             head.x = 0;
         }
         if (head.y < 0) {
-            head.y = height - CELL_SIZE;
+            head.y = height - GameConfig.CELL_SIZE;
         }
-        if (head.y > height - CELL_SIZE) {
+        if (head.y > height - GameConfig.CELL_SIZE) {
             head.y = 0;
         }
     }

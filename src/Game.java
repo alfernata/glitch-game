@@ -4,14 +4,14 @@ import java.util.Arrays;
 
 public class Game {
 
-    // размер игрока
-    private static final int CELL_SIZE = 45;
-    private static final int APPLE_SIZE = 30;
+//    // размер игрока
+//    private static final int CELL_SIZE = 45;
+//    private static final int APPLE_SIZE = 30;
 
     // скорость движения в пикселях за один кадр
-    private static final int SPEED = 7;
-
-    private static final int MAX_SNAKE_SIZE = 15;
+//    private static final int SPEED = 7;
+//
+//    private static final int MAX_SNAKE_SIZE = 15;
 
     // Snake сам делает defensive copy внутри конструктора,
     // поэтому оборачивать в new ArrayList<>(...) здесь больше не нужно.
@@ -20,7 +20,7 @@ public class Game {
             new Segment(300, 300),
             new Segment(240, 300),
             new Segment(180, 300)
-    ), SPEED);
+    ), GameConfig.SPEED);
 
     private Apple apple;
 
@@ -46,8 +46,8 @@ public class Game {
         int y = startY + random.nextInt(areaHeight);
 
         apple = new Apple(
-                (x / CELL_SIZE) * CELL_SIZE,
-                (y / CELL_SIZE) * CELL_SIZE
+                (x / GameConfig.CELL_SIZE) * GameConfig.CELL_SIZE,
+                (y / GameConfig.CELL_SIZE) * GameConfig.CELL_SIZE
         );
     }
 
@@ -62,8 +62,8 @@ public class Game {
         Rectangle snakeArea = new Rectangle(
                 (int) snake.getHead().x,
                 (int) snake.getHead().y,
-                CELL_SIZE,
-                CELL_SIZE
+                GameConfig.CELL_SIZE,
+                GameConfig.CELL_SIZE
         );
 
         // было: apple.x + 15, apple.y + 15
@@ -78,11 +78,11 @@ public class Game {
 
             // создаем новый сегмент
 
-            if (snake.size() < MAX_SNAKE_SIZE) {
+            if (snake.size() < GameConfig.MAX_SNAKE_SIZE) {
                 snake.grow();
             }
 
-            if (snake.size() == MAX_SNAKE_SIZE) {
+            if (snake.size() == GameConfig.MAX_SNAKE_SIZE) {
                 System.out.println("WIN");
                 System.exit(0);
             }
@@ -112,8 +112,8 @@ public class Game {
             Rectangle segmentArea = new Rectangle(
                     (int) segment.x,
                     (int) segment.y,
-                    CELL_SIZE,
-                    CELL_SIZE
+                    GameConfig.CELL_SIZE,
+                    GameConfig.CELL_SIZE
             );
 
             if (enemyArea.intersects(segmentArea)) {
@@ -155,8 +155,8 @@ public class Game {
             g.fillRect(
                     (int) segment.x,
                     (int) segment.y,
-                    CELL_SIZE,
-                    CELL_SIZE
+                    GameConfig.CELL_SIZE,
+                    GameConfig.CELL_SIZE
             );
         }
 
@@ -165,8 +165,8 @@ public class Game {
             g.fillRect(
                     apple.getX(),
                     apple.getY(),
-                    APPLE_SIZE,
-                    APPLE_SIZE
+                    GameConfig.APPLE_SIZE,
+                    GameConfig.APPLE_SIZE
             );
         }
 
